@@ -15,7 +15,13 @@ struct Packet {
     char data[BUFFER_SIZE];
 };
 
-unsigned short calculate_checksum(char *data, int len)
+unsigned short calculate_checksum(char *data, int len) {
+    unsigned int sum = 0;
+    for (int i = 0; i < len; i++) {
+        sum += data[i];
+    }
+    return (unsigned short)(sum & 0xFFFF);
+}
 
 int main() {
     int sockfd;
