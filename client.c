@@ -4,6 +4,7 @@
 #include <string.h>
 #include <arpa/inet.h>
 #include <unistd.h>
+#include <time.h>
 
 #define PORT 8080
 #define BUFFER_SIZE 1024
@@ -15,6 +16,9 @@ struct Packet {
     char data[BUFFER_SIZE];
 };
 
+int generateNoise() {
+    return (rand()%10)+1;
+}
 
 unsigned short calculate_checksum(char *data, int len) {
     unsigned int sum = 0;
@@ -25,6 +29,7 @@ unsigned short calculate_checksum(char *data, int len) {
 }
 
 int main() {
+    srand(time(NULL)); 
     int sockfd;
     struct sockaddr_in server_addr;
 
@@ -50,7 +55,11 @@ int main() {
         if (pkt.size <= 0) break;
 
         pkt.checksum = calculate_checksum(pkt.data, pkt.size);
-
+        int noise = generateNoise();
+        if(noise>8){
+            int corruptDiv = generateNoise();
+            pkt.data[(pkt.size-1)/corruptDiv] = pkt.data[(pkt.size-1)/corruptDiv] + 1;
+        }
         sendto(sockfd, &pkt, sizeof(pkt), 0,
                (struct sockaddr *)&server_addr, sizeof(server_addr));
 
